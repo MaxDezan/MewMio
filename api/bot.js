@@ -7,8 +7,7 @@ module.exports = async (req, res) => {
 
     const signature = req.headers["x-signature-ed25519"];
     const timestamp = req.headers["x-signature-timestamp"];
-    const rawBody = JSON.stringify(req.body);
-
+    const rawBody = Buffer.from(JSON.stringify(req.body));
     console.log("Temos Public Key?", !!process.env.DISCORD_PUBLIC_KEY);
 
     const isValidRequest = verifyKey(
@@ -28,8 +27,9 @@ module.exports = async (req, res) => {
     const interaction = req.body;
 
     if (interaction.type === 1) {
-        console.log("RECEBEMOS O PING! Devolvendo PONG (1)...");
-        return res.send({ type: 1 });
+        console.log("PING recebido! Respondendo PONG...");
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(200).send(JSON.stringify({ type: 1 }));
     }
 
     if (interaction.type === 2) {
