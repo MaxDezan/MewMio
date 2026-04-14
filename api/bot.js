@@ -32,22 +32,53 @@ module.exports = async (req, res) => {
         return res.status(200).send(JSON.stringify({ type: 1 }));
     }
 
+    //Comando /insulto
     if (interaction.type === 2) {
         const { name } = interaction.data;
 
         const username = interaction.member ? interaction.member.user.username : interaction.user.username;
 
-        // Comando /insulto
         if (name === "insulto") {
             try {
-                const response = await fetch("https://v2.jokeapi.dev/joke/Dark?type=single");
+                const response = await fetch("https://insult.ooo/api/insult");
                 const data = await response.json();
 
-                const insultoEN = data.joke || "You are so lucky I can't think of an insult right now.";
+                const insultoEN = data.insult || "You are so boring that even a snail would leave you.";
 
                 const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(insultoEN)}&langpair=en|pt`);
                 const traducaoJSON = await traducaoRes.json();
                 const insultoPT = traducaoJSON.responseData.translatedText;
+
+                return res.send({
+                    type: 4,
+                    data: {
+                        embeds: [{
+                            title: "MewMio diz:",
+                            description: `**${username}**, ${insultoPT}`,
+                            color: 0xff0000,
+                        }]
+                    }
+                });
+            } catch (err) {
+                console.error(err);
+                return res.send({
+                    type: 4,
+                    data: { content: "Até meu xingamento deu erro. Você é um caso perdido." }
+                });
+            }
+        }
+
+        // Comando /piada
+        if (name === "piada") {
+            try {
+                const response = await fetch("https://v2.jokeapi.dev/joke/Dark?type=single");
+                const data = await response.json();
+
+                const piadaEN = data.joke || "You are so lucky I can't think of an insult right now.";
+
+                const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(insultoEN)}&langpair=en|pt`);
+                const traducaoJSON = await traducaoRes.json();
+                const piadaPT = traducaoJSON.responseData.translatedText;
 
                 return res.send({
                     type: 4, // InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE
@@ -55,7 +86,7 @@ module.exports = async (req, res) => {
                         embeds: [
                             {
                                 title: "MewMio diz:",
-                                description: `**${username}**, ${insultoPT}`,
+                                description: `${piadaPT}`,
                                 color: 0xff5566,
                             }
                         ]
@@ -65,7 +96,7 @@ module.exports = async (req, res) => {
                 console.error(err);
                 return res.send({
                     type: 4,
-                    data: { content: "API do insulto caiu." }
+                    data: { content: "API da piada caiu." }
                 });
             }
         }
