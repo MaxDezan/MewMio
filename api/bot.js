@@ -33,9 +33,7 @@ module.exports = async (req, res) => {
 
     // Responde ao PING do Discord para manter o Webhook ativo
     if (interaction.type === InteractionType.PING) {
-        return res.send({
-            type: InteractionResponseType.PONG,
-        });
+        return res.status(200).json({ type: InteractionResponseType.PONG });
     }
 
     // Tratamento de Comandos Slash
