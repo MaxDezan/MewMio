@@ -33,34 +33,46 @@ module.exports = async (req, res) => {
 
         // --- COMANDO /INSULTO (Insulto Direto) ---
         if (name === "insulto") {
+            res.send({ type: 5 });
+
             try {
                 const userOption = interaction.data.options?.find(opt => opt.name === "alvo");
                 const alvo = userOption ? `<@${userOption.value}>` : `**${username}**`;
 
-                const response = await fetch("https://adhomine.com/api/v1/insult");
+                const response = await fetch("https://insult.ooo/api/insult");
                 const data = await response.json();
-                const insultoEN = data.insult || "You are the reason God created the middle finger.";
+                const insultoEN = data.insult || "You are a total disaster.";
 
                 const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(insultoEN)}&langpair=en|pt-BR`);
                 const traducaoJSON = await traducaoRes.json();
                 const insultoPT = traducaoJSON.responseData.translatedText;
 
-                return res.send({
-                    type: 4,
-                    data: {
+                const APP_ID = interaction.application_id;
+                const TOKEN = interaction.token;
+
+                await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${TOKEN}/messages/@original`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
                         embeds: [{
                             title: "MewMio diz:",
                             description: `${alvo}, ${insultoPT}`,
                             color: 0xff0000,
                         }]
-                    }
+                    })
                 });
+
             } catch (err) {
-                return res.send({
-                    type: 4,
-                    data: { content: "Até meu xingamento deu erro nessa porra." }
+                console.error(err);
+                const APP_ID = interaction.application_id;
+                const TOKEN = interaction.token;
+                await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${TOKEN}/messages/@original`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ content: "API de insulto morreu de vez." })
                 });
             }
+            return;
         }
 
         // --- COMANDO /PIADA (JokeAPI Dark) ---
