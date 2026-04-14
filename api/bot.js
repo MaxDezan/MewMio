@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     const rawBody = Buffer.from(JSON.stringify(req.body));
     console.log("Temos Public Key?", !!process.env.DISCORD_PUBLIC_KEY);
 
-    const isValidRequest = verifyKey(
+    const isValidRequest = await verifyKey(
         rawBody,
         signature,
         timestamp,
