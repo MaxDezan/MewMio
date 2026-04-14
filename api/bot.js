@@ -34,9 +34,13 @@ module.exports = async (req, res) => {
         // --- COMANDO /INSULTO (Insulto Direto) ---
         if (name === "insulto") {
             try {
-                const response = await fetch("https://insult.ooo/api/insult");
+                const response = await fetch("https://insult.ooo/api/insult", {
+                    headers: { 'Accept': 'application/json' }
+                });
+
                 const data = await response.json();
-                const insultoEN = data.insult || "Dickhead.";
+
+                const insultoEN = data.insult || "You are so boring that even a snail would leave you.";
 
                 const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(insultoEN)}&langpair=en|pt`);
                 const traducaoJSON = await traducaoRes.json();
@@ -53,7 +57,11 @@ module.exports = async (req, res) => {
                     }
                 });
             } catch (err) {
-                return res.send({ type: 4, data: { content: "Até meu xingamento deu erro nessa porra." } });
+                console.error("Erro no comando insulto:", err);
+                return res.send({
+                    type: 4,
+                    data: { content: "Até meu xingamento deu erro nessa porra." }
+                });
             }
         }
 

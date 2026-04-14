@@ -8,6 +8,9 @@ const commands = [
         .setName("insulto")
         .setDescription("MewMio insulta você"),
     new SlashCommandBuilder()
+        .setName("piada")
+        .setDescription("MewMio conta uma piada ácida"),
+    new SlashCommandBuilder()
         .setName("filosofia")
         .setDescription("quotes de sabedoria felina ancestral"),
     new SlashCommandBuilder()
