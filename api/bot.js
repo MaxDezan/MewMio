@@ -37,25 +37,36 @@ module.exports = async (req, res) => {
 
         const username = interaction.member ? interaction.member.user.username : interaction.user.username;
 
-        //Comando insulto
+        // Comando /insulto
         if (name === "insulto") {
             try {
-                const response = await fetch("https://evilinsult.com/generate_insult.php?lang=pt&type=json");
+                const response = await fetch("https://v2.jokeapi.dev/joke/Dark?type=single");
                 const data = await response.json();
 
+                const insultoEN = data.joke || "You are so lucky I can't think of an insult right now.";
+
+                const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(insultoEN)}&langpair=en|pt`);
+                const traducaoJSON = await traducaoRes.json();
+                const insultoPT = traducaoJSON.responseData.translatedText;
+
                 return res.send({
-                    type: 4, // CHANNEL_MESSAGE_WITH_SOURCE
+                    type: 4, // InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE
                     data: {
-                        embeds: [{
-                            title: "MewMio diz:",
-                            description: `**${username}**, ${data.insult}`,
-                            color: 0xff5566,
-                        }]
+                        embeds: [
+                            {
+                                title: "MewMio diz:",
+                                description: `**${username}**, ${insultoPT}`,
+                                color: 0xff5566,
+                            }
+                        ]
                     }
                 });
             } catch (err) {
                 console.error(err);
-                return res.send({ type: 4, data: { content: "API do insulto caiu." } });
+                return res.send({
+                    type: 4,
+                    data: { content: "API do insulto caiu." }
+                });
             }
         }
 
