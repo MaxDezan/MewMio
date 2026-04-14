@@ -1,7 +1,6 @@
-const { InteractionType, InteractionResponseType, verifyKey } = require("discord-interactions");
+const { verifyKey } = require("discord-interactions");
 
 module.exports = async (req, res) => {
-    // Apenas aceita POST
     if (req.method !== "POST") {
         return res.status(405).end("Method Not Allowed");
     }
@@ -10,11 +9,8 @@ module.exports = async (req, res) => {
     const timestamp = req.headers["x-signature-timestamp"];
     const rawBody = JSON.stringify(req.body);
 
-    // LOGS DE DEBUG: Isso vai aparecer lá naquela tela preta da Vercel
     console.log("Temos Public Key?", !!process.env.DISCORD_PUBLIC_KEY);
-    console.log("Temos Assinatura?", !!signature);
 
-    // Validação de segurança obrigatória para Discord Webhooks
     const isValidRequest = verifyKey(
         rawBody,
         signature,
@@ -23,7 +19,7 @@ module.exports = async (req, res) => {
     );
 
     if (!isValidRequest) {
-        console.error("❌ Falha na verificação! Assinatura não bateu.");
+        console.error("❌ Assinatura não bateu.");
         return res.status(401).end("Invalid request signature");
     }
 
@@ -31,39 +27,35 @@ module.exports = async (req, res) => {
 
     const interaction = req.body;
 
-    // Responde ao PING do Discord para manter o Webhook ativo
-    if (interaction.type === InteractionType.PING) {
-        return res.status(200).json({ type: InteractionResponseType.PONG });
+    if (interaction.type === 1) {
+        console.log("RECEBEMOS O PING! Devolvendo PONG (1)...");
+        return res.send({ type: 1 });
     }
 
-    // Tratamento de Comandos Slash
-    if (interaction.type === InteractionType.APPLICATION_COMMAND) {
+    if (interaction.type === 2) {
         const { name } = interaction.data;
 
-        // Comando /insulto
+        const username = interaction.member ? interaction.member.user.username : interaction.user.username;
+
+        //Comando insulto
         if (name === "insulto") {
             try {
                 const response = await fetch("https://evilinsult.com/generate_insult.php?lang=pt&type=json");
                 const data = await response.json();
 
                 return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    type: 4, // CHANNEL_MESSAGE_WITH_SOURCE
                     data: {
-                        embeds: [
-                            {
-                                title: "MewMio diz:",
-                                description: `**${interaction.member.user.username}**, ${data.insult}`,
-                                color: 0xff5566,
-                            }
-                        ]
+                        embeds: [{
+                            title: "MewMio diz:",
+                            description: `**${username}**, ${data.insult}`,
+                            color: 0xff5566,
+                        }]
                     }
                 });
             } catch (err) {
                 console.error(err);
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: { content: "API do insulto caiu." }
-                });
+                return res.send({ type: 4, data: { content: "API do insulto caiu." } });
             }
         }
 
@@ -76,29 +68,23 @@ module.exports = async (req, res) => {
                 const fraseEN = data[0].q;
                 const autor = data[0].a;
 
-                // Traduzindo a frase para PT-BR
                 const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(fraseEN)}&langpair=en|pt`);
                 const traducaoJSON = await traducaoRes.json();
                 const frasePT = traducaoJSON.responseData.translatedText;
 
                 return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    type: 4,
                     data: {
-                        embeds: [
-                            {
-                                title: "📜 receba a inteligência",
-                                description: `*"${frasePT}"*\n— **${autor}**`,
-                                color: 0x9966ff
-                            }
-                        ]
+                        embeds: [{
+                            title: "📜 receba a inteligência",
+                            description: `*"${frasePT}"*\n— **${autor}**`,
+                            color: 0x9966ff
+                        }]
                     }
                 });
             } catch (err) {
                 console.error(err);
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: { content: "Erro ao buscar filosofia." }
-                });
+                return res.send({ type: 4, data: { content: "Erro ao buscar filosofia." } });
             }
         }
 
@@ -109,30 +95,22 @@ module.exports = async (req, res) => {
                 const data = await response.json();
 
                 if (!data[0] || !data[0].url) {
-                    return res.send({
-                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                        data: { content: "Nenhum gatinho encontrado." }
-                    });
+                    return res.send({ type: 4, data: { content: "Nenhum gatinho encontrado." } });
                 }
 
                 return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    type: 4,
                     data: {
-                        embeds: [
-                            {
-                                title: "mrmmrmrrrrrowwww",
-                                image: { url: data[0].url },
-                                color: 0xffaacd
-                            }
-                        ]
+                        embeds: [{
+                            title: "mrmmrmrrrrrowwww",
+                            image: { url: data[0].url },
+                            color: 0xffaacd
+                        }]
                     }
                 });
             } catch (err) {
                 console.error(err);
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: { content: "Erro ao pegar GIF de gatinho." }
-                });
+                return res.send({ type: 4, data: { content: "Erro ao pegar GIF de gatinho." } });
             }
         }
     }
