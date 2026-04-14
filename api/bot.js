@@ -10,6 +10,10 @@ module.exports = async (req, res) => {
     const timestamp = req.headers["x-signature-timestamp"];
     const rawBody = JSON.stringify(req.body);
 
+    // LOGS DE DEBUG: Isso vai aparecer lá naquela tela preta da Vercel
+    console.log("Temos Public Key?", !!process.env.DISCORD_PUBLIC_KEY);
+    console.log("Temos Assinatura?", !!signature);
+
     // Validação de segurança obrigatória para Discord Webhooks
     const isValidRequest = verifyKey(
         rawBody,
@@ -19,8 +23,11 @@ module.exports = async (req, res) => {
     );
 
     if (!isValidRequest) {
+        console.error("❌ Falha na verificação! Assinatura não bateu.");
         return res.status(401).end("Invalid request signature");
     }
+
+    console.log("✅ Verificação de segurança passou!");
 
     const interaction = req.body;
 
