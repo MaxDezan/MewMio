@@ -1,6 +1,7 @@
 const { InteractionType, InteractionResponseType, verifyKey } = require("discord-interactions");
 
 module.exports = async (req, res) => {
+    // Apenas aceita POST
     if (req.method !== "POST") {
         return res.status(405).end("Method Not Allowed");
     }
@@ -9,6 +10,7 @@ module.exports = async (req, res) => {
     const timestamp = req.headers["x-signature-timestamp"];
     const rawBody = JSON.stringify(req.body);
 
+    // Validação de segurança obrigatória para Discord Webhooks
     const isValidRequest = verifyKey(
         rawBody,
         signature,
@@ -22,15 +24,18 @@ module.exports = async (req, res) => {
 
     const interaction = req.body;
 
+    // Responde ao PING do Discord para manter o Webhook ativo
     if (interaction.type === InteractionType.PING) {
         return res.send({
             type: InteractionResponseType.PONG,
         });
     }
 
+    // Tratamento de Comandos Slash
     if (interaction.type === InteractionType.APPLICATION_COMMAND) {
         const { name } = interaction.data;
 
+        // Comando /insulto
         if (name === "insulto") {
             try {
                 const response = await fetch("https://evilinsult.com/generate_insult.php?lang=pt&type=json");
@@ -57,6 +62,7 @@ module.exports = async (req, res) => {
             }
         }
 
+        // Comando /filosofia
         if (name === "filosofia") {
             try {
                 const response = await fetch("https://zenquotes.io/api/random");
@@ -65,6 +71,7 @@ module.exports = async (req, res) => {
                 const fraseEN = data[0].q;
                 const autor = data[0].a;
 
+                // Traduzindo a frase para PT-BR
                 const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(fraseEN)}&langpair=en|pt`);
                 const traducaoJSON = await traducaoRes.json();
                 const frasePT = traducaoJSON.responseData.translatedText;
@@ -90,6 +97,7 @@ module.exports = async (req, res) => {
             }
         }
 
+        // Comando /gatinho
         if (name === "gatinho") {
             try {
                 const response = await fetch("https://api.thecatapi.com/v1/images/search?mime_types=gif");
