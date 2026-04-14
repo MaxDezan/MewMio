@@ -34,15 +34,11 @@ module.exports = async (req, res) => {
         // --- COMANDO /INSULTO (Insulto Direto) ---
         if (name === "insulto") {
             try {
-                const response = await fetch("https://insult.ooo/api/insult", {
-                    headers: { 'Accept': 'application/json' }
-                });
-
+                const response = await fetch("https://v2.jokeapi.dev/joke/Pun,Miscellaneous,Dark?type=single&blacklistFlags=religious,political,racist,sexist");
                 const data = await response.json();
+                const insultoEN = data.joke || "You are as useful as a screen door on a submarine.";
 
-                const insultoEN = data.insult || "You are so boring that even a snail would leave you.";
-
-                const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(insultoEN)}&langpair=en|pt`);
+                const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(insultoEN)}&langpair=en|pt-BR`);
                 const traducaoJSON = await traducaoRes.json();
                 const insultoPT = traducaoJSON.responseData.translatedText;
 
@@ -57,11 +53,7 @@ module.exports = async (req, res) => {
                     }
                 });
             } catch (err) {
-                console.error("Erro no comando insulto:", err);
-                return res.send({
-                    type: 4,
-                    data: { content: "Até meu xingamento deu erro nessa porra." }
-                });
+                return res.send({ type: 4, data: { content: "Até meu xingamento deu erro nessa porra." } });
             }
         }
 
@@ -72,7 +64,7 @@ module.exports = async (req, res) => {
                 const data = await response.json();
                 const piadaEN = data.joke || "You´re slower than every snail in the world";
 
-                const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(piadaEN)}&langpair=en|pt`);
+                const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(piadaEN)}&langpair=en|pt-BR`);
                 const traducaoJSON = await traducaoRes.json();
                 const piadaPT = traducaoJSON.responseData.translatedText;
 
@@ -99,7 +91,7 @@ module.exports = async (req, res) => {
                 const fraseEN = data[0].q;
                 const autor = data[0].a;
 
-                const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(fraseEN)}&langpair=en|pt`);
+                const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(fraseEN)}&langpair=en|pt-BR`);
                 const traducaoJSON = await traducaoRes.json();
                 const frasePT = traducaoJSON.responseData.translatedText;
 
