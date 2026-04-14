@@ -6,7 +6,11 @@ const CLIENT_ID = "1438948155981955206";
 const commands = [
     new SlashCommandBuilder()
         .setName("insulto")
-        .setDescription("MewMio insulta você"),
+        .setDescription("MewMio insulta alguém")
+        .addUserOption(option =>
+            option.setName("alvo")
+                .setDescription("Quem o MewMio deve destruir?")
+                .setRequired(false)),
     new SlashCommandBuilder()
         .setName("piada")
         .setDescription("MewMio conta uma piada ácida"),

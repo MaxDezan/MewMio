@@ -34,9 +34,12 @@ module.exports = async (req, res) => {
         // --- COMANDO /INSULTO (Insulto Direto) ---
         if (name === "insulto") {
             try {
-                const response = await fetch("https://v2.jokeapi.dev/joke/Pun,Miscellaneous,Dark?type=single&blacklistFlags=religious,political,racist,sexist");
+                const userOption = interaction.data.options?.find(opt => opt.name === "alvo");
+                const alvo = userOption ? `<@${userOption.value}>` : `**${username}**`;
+
+                const response = await fetch("https://adhomine.com/api/v1/insult");
                 const data = await response.json();
-                const insultoEN = data.joke || "You are as useful as a screen door on a submarine.";
+                const insultoEN = data.insult || "You are the reason God created the middle finger.";
 
                 const traducaoRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(insultoEN)}&langpair=en|pt-BR`);
                 const traducaoJSON = await traducaoRes.json();
@@ -47,13 +50,16 @@ module.exports = async (req, res) => {
                     data: {
                         embeds: [{
                             title: "MewMio diz:",
-                            description: `**${username}**, ${insultoPT}`,
+                            description: `${alvo}, ${insultoPT}`,
                             color: 0xff0000,
                         }]
                     }
                 });
             } catch (err) {
-                return res.send({ type: 4, data: { content: "Até meu xingamento deu erro nessa porra." } });
+                return res.send({
+                    type: 4,
+                    data: { content: "Até meu xingamento deu erro nessa porra." }
+                });
             }
         }
 
